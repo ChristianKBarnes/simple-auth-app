@@ -1,0 +1,39 @@
+version: '3.8'
+
+networks:
+  backend:
+    driver: bridge
+
+services:
+  app:
+    build: 
+      context: .
+    container_name: simple_auth_app
+    restart: unless-stopped
+    volumes:
+      - ./project:/usr/src/app
+    ports:
+      - "${APP_PORT}:8000"
+    depends_on:
+      - app-db
+    networks:
+      - backend
+  
+  app-db:
+    build: 
+      context: ./deploy/docker/postgres
+    restart: unless-stopped
+    container_name: simple_auth_db
+    ports:
+      - "${DB_PORT}:5432"
+    environment:
+      - POSTGRES_USER= ${DB_USER}
+      - POSTGRES_PASSWORD= ${DB_PASSWORD}
+      - POSTGRES_DB= ${DB_DATABASE}
+    # volumes:
+    # - ./deploy/docker/postgres/postgres-data:/var/lib/postgresql/data
+    networks:
+      - backend
+
+    
+    
