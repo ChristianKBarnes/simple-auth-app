@@ -14,10 +14,14 @@ load_dotenv()
 class Settings(BaseSettings):
     environment: str = os.getenv("APP_ENVIRONMENT", "development")
     testing: bool = os.getenv("TESTING", 0)
-    database_url: AnyUrl = database.db_url
+    database_url = database.db_url
 
 
 @lru_cache()
 def get_settings() -> BaseSettings:
     log.info("Loading config settings from the environment...")
     return Settings()
+
+app_secret: str = os.getenv("APP_SECRET_KEY", None)
+app_hash_algorithm: str = os.getenv("APP_HASH_ALGORITHM", None)
+app_access_token_expire_minutes: float = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
