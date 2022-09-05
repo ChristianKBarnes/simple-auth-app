@@ -1,4 +1,3 @@
-import email
 import pytest
 
 from starlette.testclient import TestClient
