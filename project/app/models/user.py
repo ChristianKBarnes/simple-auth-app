@@ -14,4 +14,5 @@ class User(Model, Timestamp):
     def __int__(self):
         return self.id
 
+
 SummarySchema = pydantic_model_creator(User)
