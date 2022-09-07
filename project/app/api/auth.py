@@ -2,7 +2,6 @@ import logging
 from datetime import timedelta
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
 from app.api.crud import user_crud
@@ -14,7 +13,7 @@ from app.schemas.auth import (
 from app.config.app import (
     app_secret,
     app_hash_algorithm,
-    app_access_token_expire_minutes,
+    # app_access_token_expire_minutes,
 )
 from app.models.user import User
 from app.utils import create_access_token, verify_password, oauth2_scheme
