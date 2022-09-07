@@ -6,3 +6,4 @@ env
 
 .vscode
 .pytest_cache
+project/test.db
