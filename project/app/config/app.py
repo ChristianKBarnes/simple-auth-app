@@ -3,7 +3,7 @@ import os
 
 from dotenv import load_dotenv
 from functools import lru_cache
-from pydantic import AnyUrl, BaseSettings
+from pydantic import BaseSettings
 
 from app.config import database
 
@@ -21,6 +21,7 @@ class Settings(BaseSettings):
 def get_settings() -> BaseSettings:
     log.info("Loading config settings from the environment...")
     return Settings()
+
 
 app_secret: str = os.getenv("APP_SECRET_KEY", None)
 app_hash_algorithm: str = os.getenv("APP_HASH_ALGORITHM", None)
