@@ -13,4 +13,4 @@ db_url = "postgres://{user}:{password}@{host}:5432/{database}".format(
     user=db_user, password=db_password, host=db_host, database=db_database
 )
 
-db_test_url = "sqlite:///./test_db.db"
+db_test_url = "sqlite://test.db"
