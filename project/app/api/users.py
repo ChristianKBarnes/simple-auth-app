@@ -2,7 +2,7 @@ import logging
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.schemas.user import UserBase, UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse
 from app.api.crud import user_crud
 from app.api.auth import get_current_active_user
 from app.models.user import User
