@@ -33,7 +33,7 @@ jobs:
           pytest
 
       - name: Trigger push to heroku
-        if: success() && github.event_name == 'push' && github.ref_name == 'main'
+        if: success() && github.event_name == 'push'
         uses: benc-uk/workflow-dispatch@v1
         with:
           workflow: Deploy to heroku

@@ -9,12 +9,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
 
-      - name: Build, Push and Release a Docker container to Heroku.
-        uses: gonuit/heroku-docker-deploy@v1.3.3 # GitHub action name (leave it as it is).
+      - name: Build, Push and Deploy to Heroku
+        id: heroku
+        uses: jctaveras/heroku-deploy@v1.0.0
         with:
           email: ${{ secrets.HEROKU_EMAIL }}
-          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
-          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
-
-          dockerfile_name: Dockerfile.prod
+          api_key: ${{ secrets.HEROKU_API_KEY }}
+          app_name: ${{ secrets.HEROKU_APP_NAME }}
+          dockerfile_path: "."
+          process_type: "web"
           # docker_options: "--no-cache"
