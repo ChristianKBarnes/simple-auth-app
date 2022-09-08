@@ -31,3 +31,10 @@ jobs:
       - name: Test with pytest
         run: |
           pytest
+
+      - name: Trigger push to heroku
+        if: success() && github.event_name == 'push' && github.ref_name == 'main'
+        uses: benc-uk/workflow-dispatch@v1
+        with:
+          workflow: Deploy to heroku
+          token: ${{ secrets.REPO_GHA_PAT }}
