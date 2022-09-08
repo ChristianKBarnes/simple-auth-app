@@ -1,9 +1,6 @@
-name: Deploy to heroku.
+name: Deploy to heroku
 
-on:
-  workflow_run:
-    workflows: [Simple auth application]
-    branches: [master]
+on: workflow_dispatch
 
 jobs:
   build:
