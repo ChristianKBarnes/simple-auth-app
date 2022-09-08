@@ -33,6 +33,7 @@ jobs:
           pytest
 
       - name: Build, Push and Release a Docker container to Heroku.
+        if: success() && github.event_name == 'push' && github.ref_name == 'main'
         uses: gonuit/heroku-docker-deploy@v1.3.3
         with:
           email: ${{ secrets.HEROKU_EMAIL }}
