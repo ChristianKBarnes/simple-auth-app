@@ -32,9 +32,26 @@ jobs:
         run: |
           pytest
 
-      - name: Trigger push to heroku
-        if: success() && github.event_name == 'push'
-        uses: benc-uk/workflow-dispatch@v1
+      # - name: Trigger push to heroku
+      #   if: success() && github.event_name == 'push'
+      #   uses: benc-uk/workflow-dispatch@v1
+      #   with:
+      #     workflow: Deploy to heroku
+      #     token: ${{ secrets.REPO_GHA_PAT }}
+
+      - name: Build, Push and Release a Docker container to Heroku.
+        uses: gonuit/heroku-docker-deploy@v1.3.3
         with:
-          workflow: Deploy to heroku
-          token: ${{ secrets.REPO_GHA_PAT }}
+          email: ${{ secrets.HEROKU_EMAIL }}
+
+          heroku_api_key: ${{ secrets.HEROKU_API_KEY }}
+
+          heroku_app_name: ${{ secrets.HEROKU_APP_NAME }}
+
+          dockerfile_directory: ./
+
+          dockerfile_name: Dockerfile.prod
+
+          docker_options: "--no-cache"
+
+          process_type: web
