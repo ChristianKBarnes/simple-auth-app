@@ -13,24 +13,24 @@ TORTOISE_ORM = {
     "connections": {"default": database.db_url},
     "apps": {
         "models": {
-            "models": ["app.models.user", "aerich.models"],
+            "models": database.MODELS,
             "default_connection": "default",
         },
     },
 }
 
 
-def init_db(app: FastAPI) -> None:
+def init_db(app: FastAPI) -> None: # pragma: no cover
     register_tortoise(
         app,
         db_url=database.db_url,
-        modules={"models": ["app.models.user"]},
+        modules={"models": database.MODELS[:-1]},
         generate_schemas=True,
         add_exception_handlers=True,
     )
 
 
-async def generate_schema() -> None:
+async def generate_schema() -> None: # pragma: no cover
     log.info("Initializing Tortoise...")
 
     await Tortoise.init(
@@ -42,5 +42,5 @@ async def generate_schema() -> None:
     await Tortoise.close_connections()
 
 
-if __name__ == "__main__":
+if __name__ == "__main__": # pragma: no cover
     run_async(generate_schema())

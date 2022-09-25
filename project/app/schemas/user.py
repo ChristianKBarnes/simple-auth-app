@@ -10,11 +10,11 @@ class UserCreate(UserBase):
     password: str
     email: EmailStr
 
-    # @validator("password")
-    # def passwords_strength(cls, input_password):
-
-    #     return input_passwor
-
 
 class UserResponse(UserBase):
     id: int
+
+
+class UserUpdate(UserBase):
+    name: str | None
+    email: EmailStr | None

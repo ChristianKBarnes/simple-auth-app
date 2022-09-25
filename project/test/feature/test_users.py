@@ -79,7 +79,7 @@ def test_delete_request_deletes_user(test_app_with_db, anyio_backend, create_use
     assert response.status_code == 204
 
     response = test_app_with_db.get("/users/{id}".format(id=user.id))
-    assert response.json() == {"detail": "User Not Found"}
+    assert response.json() == {"errors": "User Not Found"}
     assert response.status_code == 404
 
 
@@ -87,5 +87,46 @@ def test_delete_request_works_for_only_existing_users(test_app_with_db):
 
     response = test_app_with_db.delete("/users/0")
 
-    assert response.json() == {"detail": "User Not Found"}
+    assert response.json() == {"errors": "User Not Found"}
     assert response.status_code == 404
+
+
+def test_update_requests_with_non_existent_user_returns_404(test_app_with_db):
+    response = test_app_with_db.put("/users/0", json={"email": fake.email()})
+
+    assert response.status_code == 404
+
+
+# @pytest.mark.parametrize("anyio_backend", ["asyncio"])
+# async def test_update_requests_with_existing_email_returns_422(
+#     test_app_with_db, anyio_backend, create_user
+# ):
+#     user1 = create_user
+#     user2 = create_user
+
+#     response = test_app_with_db.put(
+#         "/users/{user}".format(user=user2.id), json={"email": user1.email}
+#     )
+
+#     assert response.status_code == 422
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_update_requests_with_unique_email_returns_200(
+    test_app_with_db, anyio_backend, create_user
+):
+    user = create_user
+    email = fake.email()
+
+    response = test_app_with_db.put(
+        "/users/{user}".format(user=user.id), json={"email": email}
+    )
+    assert response.status_code == 200
+
+    response = test_app_with_db.get("/users/{id}".format(id=user.id))
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data["email"] != user.email
+    assert data["email"] == email
+    assert data["name"] == user.name

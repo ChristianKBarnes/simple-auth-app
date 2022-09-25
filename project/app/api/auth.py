@@ -26,13 +26,6 @@ log = logging.getLogger("uvicorn")
 async def register(payload: RegisterPayloadSchema) -> AuthResponseSchema:
     user = await user_crud.post(payload)
 
-    if not user:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-            detail="User already exists",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
     access_token_expires = timedelta(minutes=30)
     access_token = create_access_token({"sub": user.email}, access_token_expires)
 
@@ -84,7 +77,7 @@ async def authenticate_user(username: str, password: str):
     return user
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)):
+async def get_current_user(token: str = Depends(oauth2_scheme)): # pragma: no cover
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -103,7 +96,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     return user
 
 
-async def get_current_active_user(current_user: User = Depends(get_current_user)):
+async def get_current_active_user(current_user: User = Depends(get_current_user)): # pragma: no cover
     if current_user.deleted_at:
         raise HTTPException(status_code=400, detail="Inactive user")
     return current_user

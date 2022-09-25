@@ -2,3 +2,18 @@
 tortoise_orm = "app.db.TORTOISE_ORM"
 location = "./database/migrations"
 src_folder = "./."
+
+
+[tool.pytest.ini_options]
+filterwarnings = "error"
+addopts = '''
+  --strict-markers
+  --tb=short
+  --cov=app
+  --cov=tests
+  --cov-branch
+  --cov-report=term-missing
+  --cov-report=html
+  --no-cov-on-fail
+  --cov-fail-under=95
+'''
