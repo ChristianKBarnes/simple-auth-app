@@ -1,6 +1,7 @@
 import pytest
 
 from starlette.testclient import TestClient
+from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
 from faker import Faker
 
@@ -8,6 +9,8 @@ from app.config.app import Settings, get_settings
 from app.main import create_application
 from app.config import database
 from app.api.auth import get_current_active_user
+from app.models.student import Student
+from app.models.guardian import Guardian
 
 fake = Faker()
 
@@ -35,6 +38,42 @@ def get_current_active_user_override():
 def anyio_backend(request):
     return request.param
 
+
+@pytest.fixture
+async def create_student(request) -> Student:
+    """create a student in the db"""
+    first_name = fake.first_name()
+    last_name = fake.last_name()
+    other_names = request if request else None
+    student_code = "LS-{}".format(fake.random_number(10))
+
+    student = Student(
+        first_name=first_name,
+        last_name=last_name,
+        other_names=other_names,
+        student_code=student_code,
+    )
+    await student.save()
+
+    return student
+
+
+@pytest.fixture
+async def create_guardian(request) -> Guardian:
+    """create a guardian in the db"""
+    first_name = fake.first_name()
+    last_name = fake.last_name()
+    other_names = request if request else None
+    phone = fake.unique.phone_number()
+
+    guardian = Guardian(
+        first_name=first_name, last_name=last_name, phone=phone
+    )
+    await guardian.save()
+
+    return guardian
+
+
 @pytest.fixture(scope="module")
 def test_app():
     # set up
@@ -54,10 +93,11 @@ def test_app_with_db():
     app = create_application()
     app.dependency_overrides[get_settings] = get_settings_override
     app.dependency_overrides[get_current_active_user] = get_current_active_user_override
+    Tortoise._drop_databases
     register_tortoise(
         app,
         db_url=database.db_test_url,
-        modules={"models": ["app.models.user"]},
+        modules={"models": database.MODELS[:-1]},
         generate_schemas=True,
         add_exception_handlers=True,
     )

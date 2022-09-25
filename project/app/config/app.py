@@ -17,7 +17,7 @@ class Settings(BaseSettings):
     database_url = database.db_url
 
 
-@lru_cache()
+@lru_cache()  # pragma: no cover
 def get_settings() -> BaseSettings:
     log.info("Loading config settings from the environment...")
     return Settings()

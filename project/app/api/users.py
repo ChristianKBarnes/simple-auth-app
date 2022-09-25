@@ -3,7 +3,7 @@ from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException, status
 
-from app.schemas.user import UserCreate, UserResponse
+from app.schemas.user import UserCreate, UserResponse, UserUpdate
 from app.api.crud import user_crud
 from app.api.auth import get_current_active_user
 from app.models.user import User
@@ -35,7 +35,7 @@ async def show(id: int) -> UserResponse:
 async def store(
     payload: UserCreate, current_user: User = Depends(get_current_active_user)
 ) -> UserResponse:
-    if not current_user:
+    if not current_user: # pragma: no cover
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             headers={"WWW-Authenticate": "Bearer"},
@@ -44,6 +44,18 @@ async def store(
     user = await user_crud.post(payload)
 
     return {"id": user.id, "name": user.name, "email": user.email}
+
+
+@router.put("/{id}", status_code=200)
+async def update(id: int, payload: UserUpdate) -> dict:
+    user = await user_crud.put(id, payload)
+
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="User not found."
+        )
+
+    return {"message": "User updated successfullyu"}
 
 
 @router.delete("/{id}", status_code=204)

@@ -1,3 +1,4 @@
+from typing_extensions import assert_type
 from faker import Faker
 
 fake = Faker()
@@ -89,4 +90,4 @@ def test_unregister_user_cannot_login(test_app_with_db):
         "/auth/login", json={"username": fake.email(), "password": "password"}
     )
     assert response.status_code == 401
-    assert response.json() == {"detail": "Incorrect username or password"}
+    assert response.json() == {"errors": "Incorrect username or password"}
