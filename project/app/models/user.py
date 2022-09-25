@@ -11,8 +11,11 @@ class User(Model, Timestamp):
     email = fields.CharField(119, unique=True, null=False)
     password = fields.CharField(119, null=False)
 
-    def __int__(self):
-        return self.id
+    def __str__(self): # pragma: no cover
+        return self.name
+    
+    class PydanticMeta:
+        exclude = ["password"]
 
 
 SummarySchema = pydantic_model_creator(User)

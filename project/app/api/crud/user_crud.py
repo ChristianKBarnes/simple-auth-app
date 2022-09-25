@@ -46,7 +46,7 @@ async def delete(id: int) -> int | None:
 
 async def put(id: int, payload: UserBase) -> dict | None:
     user = await User.filter(Q(id=id) & Q(deleted_at=None)).update(
-        email=payload.email, name=payload.name
+        **payload.dict(exclude_unset=True)
     )
     if user:
         updated_user = await User.filter(id=id).first()
