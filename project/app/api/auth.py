@@ -77,7 +77,7 @@ async def authenticate_user(username: str, password: str):
     return user
 
 
-async def get_current_user(token: str = Depends(oauth2_scheme)): # pragma: no cover
+async def get_current_user(token: str) -> User:  # pragma: no cover
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -90,13 +90,19 @@ async def get_current_user(token: str = Depends(oauth2_scheme)): # pragma: no co
             raise credentials_exception
     except JWTError:
         raise credentials_exception
-    user = await user_crud.get_user_by_email(username=username)
+    except AttributeError:
+        raise credentials_exception
+    user = await user_crud.get_user_by_email(email=username)
     if user is None:
         raise credentials_exception
     return user
 
 
-async def get_current_active_user(current_user: User = Depends(get_current_user)): # pragma: no cover
-    if current_user.deleted_at:
-        raise HTTPException(status_code=400, detail="Inactive user")
-    return current_user
+async def get_current_active_user(authorization_token: str) -> User:  # pragma: no cover
+    authorized_user = await get_current_user(authorization_token)
+
+    if not authorized_user or authorized_user.deleted_at:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="Inactive user"
+        )
+    return authorized_user
