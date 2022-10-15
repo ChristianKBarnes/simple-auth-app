@@ -1,7 +1,11 @@
-import datetime
+import datetime, io
 from typing import Dict, List
 import logging
-from fastapi import APIRouter, Depends, HTTPException, status
+
+from requests import request
+import qrcode
+from fastapi import APIRouter, HTTPException, Request, status
+from starlette.responses import StreamingResponse
 
 from app.api.crud import student_crud
 from app.schemas.student import StudentCreate, StudentResponse, StudentUpdate
@@ -138,7 +142,7 @@ async def check_out(student_code: str):
 
 
 @router.get("/{student_code}/qr-code", status_code=status.HTTP_200_OK)
-async def qr_code(student_code: str):
+async def qr_code(student_code: str, request: Request):
     student = await student_crud.get_student_by_student_code(student_code)
 
     if not student:
@@ -146,5 +150,10 @@ async def qr_code(student_code: str):
             status_code=status.HTTP_400_BAD_REQUEST, detail="Student Not Found"
         )
 
-    # generate student qr code
-    pass
+    # log.info("{base_url}students/{student_code}/check-in".format(base_url = request.base_url,student_code=student_code))
+
+    img = qrcode.make(student_code)
+    response_buffer = io.BytesIO()
+    img.save(response_buffer)
+    response_buffer.seek(0)
+    return StreamingResponse(response_buffer, media_type="image/jpeg")

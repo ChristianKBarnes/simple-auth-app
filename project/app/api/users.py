@@ -32,15 +32,7 @@ async def show(id: int) -> UserResponse:
 
 
 @router.post("/", response_model=UserResponse, status_code=201)
-async def store(
-    payload: UserCreate, current_user: User = Depends(get_current_active_user)
-) -> UserResponse:
-    if not current_user: # pragma: no cover
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-
+async def store(payload: UserCreate) -> UserResponse:
     user = await user_crud.post(payload)
 
     return {"id": user.id, "name": user.name, "email": user.email}
