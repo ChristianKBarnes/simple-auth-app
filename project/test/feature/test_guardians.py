@@ -1,9 +1,8 @@
-import datetime, pytest
+import pytest
 from typing import List
 
 from faker import Faker
 
-from app.models.guardian import Guardian
 
 fake = Faker(["tw_GH"])
 
