@@ -10,7 +10,7 @@ from app.schemas.guardian import GuardianCreate, GuardianResponse, GuardianUpdat
 router = APIRouter()
 
 
-@router.get("/", response_model=List[GuardianResponse], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=List[GuardianResponse], status_code=status.HTTP_200_OK, summary="Get All Guardians")
 async def index(email: str = None, phone: str = None) -> List[GuardianResponse]:
     if phone:
         guardian = await guardian_crud.get_guardian_by_phone(phone)
@@ -27,7 +27,7 @@ async def index(email: str = None, phone: str = None) -> List[GuardianResponse]:
     return guardians
 
 
-@router.get("/{id}", response_model=GuardianResponse, status_code=status.HTTP_200_OK)
+@router.get("/{id}", response_model=GuardianResponse, status_code=status.HTTP_200_OK, summary="Get Guardians")
 async def show(id: int) -> GuardianResponse:
     guardian = await guardian_crud.get(id)
     if not guardian:
@@ -38,7 +38,7 @@ async def show(id: int) -> GuardianResponse:
     return guardian
 
 
-@router.post("/", response_model=GuardianResponse, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=GuardianResponse, status_code=status.HTTP_201_CREATED, summary="Create New Guardian")
 async def store(payload: GuardianCreate) -> GuardianResponse:
     guardian = await guardian_crud.post(payload)
 
@@ -55,7 +55,7 @@ async def store(payload: GuardianCreate) -> GuardianResponse:
     }
 
 
-@router.put("/{id}", status_code=status.HTTP_200_OK)
+@router.put("/{id}", status_code=status.HTTP_200_OK, summary="Update Guardian Details")
 async def update(id: int, payload: GuardianUpdate) -> dict:
     guardian = await guardian_crud.put(id, payload)
 
@@ -67,7 +67,7 @@ async def update(id: int, payload: GuardianUpdate) -> dict:
     return {"message": "Guardian updated successfullyu"}
 
 
-@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Guardian")
 async def delete(id: int):
     guardian = await guardian_crud.delete(id)
 
