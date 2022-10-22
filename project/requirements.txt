@@ -1,10 +1,12 @@
 aerich==0.6.3
+aiosmtplib==1.1.7
 aiosqlite==0.17.0
 anyio==3.6.1
 asgiref==3.5.2
 asyncpg==0.26.0
 attrs==22.1.0
 bcrypt==4.0.0
+blinker==1.5
 certifi==2022.6.15
 cffi==1.15.1
 charset-normalizer==2.1.1
@@ -18,11 +20,14 @@ email-validator==1.2.1
 execnet==1.9.0
 Faker==14.2.0
 fastapi==0.81.0
+fastapi-mail==1.1.4
 gunicorn==20.1.0
 h11==0.13.0
 idna==3.3
 iniconfig==1.1.1
 iso8601==1.0.2
+Jinja2==3.1.2
+MarkupSafe==2.1.1
 mccabe==0.7.0
 packaging==21.3
 passlib==1.7.4
