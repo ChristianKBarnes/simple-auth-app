@@ -1,3 +1,4 @@
+from datetime import date
 from pydantic import BaseModel, EmailStr
 
 
@@ -9,7 +10,7 @@ class GuardianBase(BaseModel):
     email: EmailStr | None
     identification_document_type: str | None
     identification_document_number: str | None
-    identification_document_expiry: str | None
+    identification_document_expiry: date | None
 
 
 class GuardianCreate(GuardianBase):

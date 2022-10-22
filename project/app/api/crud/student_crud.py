@@ -1,5 +1,5 @@
 import datetime
-from typing import List
+from typing import Dict, List
 from faker import Faker
 from tortoise.expressions import Q
 
@@ -32,9 +32,7 @@ async def post(payload: StudentCreate) -> dict | None:
 
 
 async def get(id: int) -> dict | None:
-    student = await Student_Pydantic.from_queryset_single(
-        Student.get(id=id, deleted_at=None)
-    )
+    student = await Student.get(id=id, deleted_at=None)
 
     if student:
         return student
@@ -42,17 +40,26 @@ async def get(id: int) -> dict | None:
 
 
 async def get_student_by_student_code(student_code: str) -> dict | None:
-    student = await Student_Pydantic.from_queryset_single(
-        Student.get(student_code=student_code, deleted_at=None)
-    )
+    student = await Student.get(student_code=student_code, deleted_at=None)
 
     if student:
         return student
     return None
 
 
+async def get_student_attendace_by_student_code(student_code: str) -> Dict | None:
+    student = await Student.get(
+        student_code=student_code, deleted_at=None
+    ).prefetch_related("attendance")
+
+    attendance = await student.attendance
+
+    return attendance
+
+
 async def get_all() -> List:
-    students = await Student_Pydantic.from_queryset(Student.filter(deleted_at=None))
+    students = await Student.filter(deleted_at=None)
+
     return students
 
 
@@ -66,7 +73,7 @@ async def delete(id: int) -> int | None:
     return None
 
 
-async def put(id: int, payload: StudentUpdate) -> dict | None:
+async def put(id: int, payload: StudentUpdate) -> Dict | None:
     data = payload.dict(exclude_unset=True)
 
     if "guardians" in data:
