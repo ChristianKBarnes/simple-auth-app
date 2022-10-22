@@ -1,4 +1,3 @@
-from typing_extensions import assert_type
 from faker import Faker
 
 fake = Faker()
@@ -15,7 +14,6 @@ def test_post_request_without_body_returns_422(test_app_with_db):
 
 
 def test_register_with_invalid_email_returns_422(test_app_with_db):
-    """all of email  is required"""
     response = test_app_with_db.post(
         "/auth/register",
         json={"name": fake.name(), "email": "email", "password": "password"},
@@ -24,7 +22,6 @@ def test_register_with_invalid_email_returns_422(test_app_with_db):
 
 
 def test_post_request_with_improper_body_returns_422(test_app_with_db):
-    """all of email  is required"""
     response = test_app_with_db.post(
         "/auth/register", json={"invalid_key": fake.email(), "password": "password"}
     )
