@@ -7,19 +7,25 @@ class StudentBase(BaseModel):
     last_name: str
     other_names: str | None
     email: EmailStr | None
-    guardians: List[int] | None
 
 
 class StudentCreate(StudentBase):
-    # student_code: str | None
-    pass
-
-class StudentResponse(StudentBase):
-    id: int
-    student_code: str | None
+    guardians: List[int] | None
 
 
 class StudentUpdate(StudentBase):
     first_name: str | None
     last_name: str | None
+    guardians: List[int] | None
 
+
+class BaseResponse(StudentBase):
+    id: int
+    student_code: str | None
+
+ 
+class AllStudentsResponse(BaseModel):
+    students: List[BaseResponse]
+
+class GetStudentResponse(BaseModel):
+    student: BaseResponse

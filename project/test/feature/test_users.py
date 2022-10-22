@@ -1,4 +1,4 @@
-import datetime, pytest
+import pytest
 from typing import List
 
 from faker import Faker
