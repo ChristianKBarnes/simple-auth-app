@@ -22,7 +22,7 @@ router = APIRouter()
 log = logging.getLogger("uvicorn")
 
 
-@router.post("/register", response_model=AuthResponseSchema, status_code=201)
+@router.post("/register", response_model=AuthResponseSchema, status_code=201, summary="Register New User")
 async def register(payload: RegisterPayloadSchema) -> AuthResponseSchema:
     user = await user_crud.post(payload)
 
@@ -40,7 +40,7 @@ async def register(payload: RegisterPayloadSchema) -> AuthResponseSchema:
     }
 
 
-@router.post("/login", response_model=AuthResponseSchema, status_code=200)
+@router.post("/login", response_model=AuthResponseSchema, status_code=200, summary="Login User")
 async def login(form_data: LoginPayloadSchema) -> AuthResponseSchema:
     user = await authenticate_user(form_data.username, form_data.password)
 
