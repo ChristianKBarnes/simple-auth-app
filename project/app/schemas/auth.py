@@ -1,5 +1,6 @@
-from typing import Dict, TypedDict
 from pydantic import BaseModel, EmailStr
+
+from app.schemas.user import UserResponse
 
 
 class AuthBase(BaseModel):
@@ -16,13 +17,7 @@ class LoginPayloadSchema(BaseModel):
     password: str
 
 
-class UserSchema(TypedDict):
-    id: int
-    name: str
-    email: str
-
-
 class AuthResponseSchema(BaseModel):
     access_token: str
     token_type: str
-    user: UserSchema
+    user: UserResponse
