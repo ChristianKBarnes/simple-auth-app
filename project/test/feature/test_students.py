@@ -38,7 +38,7 @@ def test_post_request_with_proper_body_returns_201(test_app_with_db):
             "other_names": fake.first_name(),
         },
     )
-    data = response.json()
+    data = response.json()["student"]
 
     assert response.status_code == 201
     assert data["first_name"] == first_name
@@ -48,7 +48,7 @@ def test_get_returns_all_students(test_app_with_db):
     response = test_app_with_db.get("/students/")
 
     assert response.status_code == 200
-    assert isinstance(response.json(), List)
+    assert isinstance(response.json(), object)
 
 
 def test_get_request_with_student_student_code_returns_not_found(test_app_with_db):
@@ -76,7 +76,7 @@ async def test_post_request_with_guardians_creates_student_guardian_relation(
             "guardians": [guardian.id],
         },
     )
-    data = response.json()
+    data = response.json()["student"]
 
     assert response.status_code == 201
     assert data["first_name"] == first_name
@@ -108,7 +108,7 @@ async def test_get_request_with_id_returns_student(
     student = create_student
 
     response = test_app_with_db.get("/students/{id}".format(id=student.id))
-    data = response.json()
+    data = response.json()["student"]
 
     assert response.status_code == 200
     assert data["id"] == student.id
@@ -126,7 +126,7 @@ async def test_get_request_with_student_code_returns_student(
     response = test_app_with_db.get(
         "/students/?student_code={code}".format(code=student.student_code)
     )
-    data = response.json()[0]
+    data = response.json()["students"][0]
 
     assert response.status_code == 200
     assert data["id"] == student.id
@@ -176,7 +176,7 @@ async def test_update_requests_with_unique_student_id_returns_200(
     assert response.status_code == 200
 
     response = test_app_with_db.get("/students/{id}".format(id=student.id))
-    data = response.json()
+    data = response.json()["student"]
 
     assert response.status_code == 200
     assert data["email"] != student.email
