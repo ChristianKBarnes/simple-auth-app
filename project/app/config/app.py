@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     testing: bool = os.getenv("TESTING", 0)
     database_url = database.db_url
 
-    MAIL_TEMPLATE_FOLDER: str = "app/email-templates/build"
+    # MAIL_TEMPLATE_FOLDER: str = "app/email-templates/build"
 
     email_configuration = ConnectionConfig(
         MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
@@ -34,7 +34,7 @@ class Settings(BaseSettings):
         MAIL_SERVER=os.getenv("MAIL_SERVER"),
         MAIL_TLS=True,
         MAIL_SSL=False,
-        TEMPLATE_FOLDER=MAIL_TEMPLATE_FOLDER,
+        # TEMPLATE_FOLDER=MAIL_TEMPLATE_FOLDER,
     )
 
 
