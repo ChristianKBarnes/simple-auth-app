@@ -32,7 +32,7 @@ async def post(payload: StudentCreate) -> dict | None:
 
 
 async def get(id: int) -> dict | None:
-    student = await Student.get(id=id, deleted_at=None)
+    student = await Student.get_or_none(id=id, deleted_at=None)
 
     if student:
         return student
@@ -40,11 +40,21 @@ async def get(id: int) -> dict | None:
 
 
 async def get_student_by_student_code(student_code: str) -> dict | None:
-    student = await Student.get(student_code=student_code, deleted_at=None)
+    student = await Student.get_or_none(student_code=student_code, deleted_at=None)
 
     if student:
         return student
     return None
+
+
+async def get_student_relation_by_student_code(
+    student_code: str, relation: str
+) -> Dict | None:
+    student = await Student.get(
+        student_code=student_code, deleted_at=None
+    ).prefetch_related(relation)
+
+    return student
 
 
 async def get_student_attendace_by_student_code(student_code: str) -> Dict | None:
@@ -97,7 +107,7 @@ async def put(id: int, payload: StudentUpdate) -> Dict | None:
 
 
 async def generate_student_code() -> str:
-    student_count = await Student.all().count()
+    student_count = await Student.all().count() + 1
     pad = str(student_count).zfill(8)
 
     return "LS{0}-{1}".format(pad, fake.random_number(3))
@@ -132,9 +142,19 @@ async def check_in(student: int, date):
 
 
 async def check_out(student: int, date):
-    attendance = StudentAttendance.filter(Q(student=student) & Q(date=date))
-
-    if attendance:
-        await attendance.update(checkout_at=datetime.datetime.now())
+    attendance = await StudentAttendance.filter(
+        Q(student=student) & Q(date=date)
+    ).update(checkout_at=datetime.datetime.now())
 
     return attendance
+
+
+async def get_student_guardians_emails(student: str):
+    student = await get_student_relation_by_student_code(student, "guardians")
+    guardians = await student.guardians
+
+    return [
+        {"email": guardian.email, "name": guardian.first_name}
+        for guardian in guardians
+        if guardian.email is not None
+    ]

@@ -20,14 +20,12 @@ class Student(Model, Timestamp):
     def __str__(self):
         return self.fullname()
 
-    def fullname(self):  # pragma: no cover
+    def fullname(self) -> str:
         if self.other_names:
-            return "{0} {1} {2} ".format(
+            return "{0} {1} {2}".format(
                 self.first_name, self.other_names, self.last_name
             )
         return "{0} {1}".format(self.first_name, self.last_name)
-    
 
     class PydanticMeta:
         exclude = ["created_at", "deleted_at"]
-

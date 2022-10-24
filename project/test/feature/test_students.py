@@ -97,8 +97,41 @@ async def test_put_request_with_guardians_creates_student_guardian_relation(
             "guardians": [guardian.id],
         },
     )
+    assert response.status_code == 200
+
+    response = test_app_with_db.get("/students/{0}/guardians".format(student.student_code))
+    data = response.json()
 
     assert response.status_code == 200
+    assert isinstance(data['guardians'], List)
+    for g in data['guardians']:
+        assert g["id"] == guardian.id
+
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_put_request_with_invalid_guardians_does_not_creates_student_guardian_relation(
+    test_app_with_db, anyio_backend, create_student
+):
+    first_name = fake.first_name()
+    student = create_student
+
+    response = test_app_with_db.put(
+        "/students/{id}".format(id=student.id),
+        json={
+            "first_name": first_name,
+            "guardians": [4000],
+        },
+    )
+    assert response.status_code == 200
+
+    response = test_app_with_db.get("/students/{0}/guardians".format(student.student_code))
+    data = response.json()
+
+    assert response.status_code == 200
+    assert isinstance(data['guardians'], List)
+    for guardian in data['guardians']:
+        assert guardian.id != 4000
 
 
 @pytest.mark.parametrize("anyio_backend", ["asyncio"])
@@ -277,6 +310,19 @@ async def test_existing_student_can_check_out_more_than_once(
 
 
 @pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_existing_student_cannot_check_out_if_he_has_not_checked_in(
+    test_app_with_db, create_student, anyio_backend
+):
+    student = create_student
+
+    response = test_app_with_db.post(
+        "students/{student_code}/check-out".format(student_code=student.student_code)
+    )
+    data = response.json()
+    assert data["errors"] == "Student has not checked in"
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
 async def test_get_existing_student_qr_code_returns_200(
     test_app_with_db, create_student, anyio_backend
 ):
@@ -295,3 +341,80 @@ def test_get_non_existing_student_qr_code_returns_404(test_app_with_db):
     )
 
     assert response.status_code == 404
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_user_can_get_existing_student_attendance(
+    test_app_with_db, create_student, anyio_backend
+):
+    student = create_student
+
+    response = test_app_with_db.get(
+        "students/{student_code}/attendance".format(student_code=student.student_code)
+    )
+
+    assert response.status_code == 200
+
+
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_user_cannot_get_non_existing_student_attendance(
+    test_app_with_db,  anyio_backend
+):
+    response = test_app_with_db.get(
+        "students/{student_code}/attendance".format(student_code=fake.random_number())
+    )
+
+    assert response.status_code == 404
+    assert response.json() == {'detail': 'Object does not exist'}
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_student_with_guardian_receives_email_when_checked_in(
+    test_app_with_db,  anyio_backend, create_student, create_guardian
+):
+    first_name = fake.first_name()
+    student = create_student
+    guardian = create_guardian
+
+    response = test_app_with_db.put(
+        "/students/{id}".format(id=student.id),
+        json={
+            "first_name": first_name,
+            "guardians": [guardian.id],
+        },
+    )
+    assert response.status_code == 200
+
+    response = test_app_with_db.post(
+        "students/{student_code}/check-in".format(student_code=student.student_code)
+    )
+    
+
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_student_with_guardian_receives_email_when_checked_out(
+    test_app_with_db,  anyio_backend, create_student, create_guardian
+):
+    first_name = fake.first_name()
+    student = create_student
+    guardian = create_guardian
+
+    response = test_app_with_db.put(
+        "/students/{id}".format(id=student.id),
+        json={
+            "first_name": first_name,
+            "guardians": [guardian.id],
+        },
+    )
+    assert response.status_code == 200
+    
+    response = test_app_with_db.post(
+        "students/{student_code}/check-in".format(student_code=student.student_code)
+    )
+
+    response = test_app_with_db.post(
+        "students/{student_code}/check-out".format(student_code=student.student_code)
+    )

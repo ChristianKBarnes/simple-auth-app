@@ -1,12 +1,19 @@
 import datetime, io
-from typing import Dict, List
+from typing import Dict
 
 import qrcode
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
 from starlette.responses import StreamingResponse
 
 from app.api.crud import student_crud
-from app.schemas.student import StudentCreate, AllStudentsResponse, GetStudentResponse, StudentUpdate
+from app.schemas.student import (
+    StudentCreate,
+    AllStudentsResponse,
+    GetStudentResponse,
+    StudentUpdate,
+)
+from app.utils import send_email, send_multiple_emails
+from app.config.app import Settings, get_settings
 
 router = APIRouter()
 
@@ -60,6 +67,7 @@ async def store(payload: StudentCreate) -> GetStudentResponse:
 
     return {"student": student}
 
+
 @router.put("/{id}", status_code=200, summary="Update Student Details")
 async def update(id: int, payload: StudentUpdate) -> Dict:
     student = await student_crud.put(id, payload)
@@ -90,7 +98,12 @@ async def delete(id: int):
     summary="Check In Student",
     description="You can check in a student once daily. You cannot check in a student after you have checked the student in.",
 )
-async def check_in(student_code: str):
+async def check_in(
+    student_code: str,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    settings: Settings = Depends(get_settings),
+):
     student = await student_crud.get_student_by_student_code(student_code)
     date = datetime.datetime.now()
 
@@ -104,14 +117,28 @@ async def check_in(student_code: str):
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Student has already checked in",
             )
-
         await student_crud.check_in(student.id, date.strftime("%Y-%m-%d"))
-        # send notification to student guardians.
+        guardians = await student_crud.get_student_guardians_emails(student_code)
+
+        if guardians:
+            send_multiple_emails(
+                background_tasks,
+                subject="Check In Notification",
+                recipients=guardians,
+                body={
+                    "url_for": request.url_for,
+                    "ward": student.fullname(),
+                    "checkin_at": date.strftime("%A, %d %B, %Y %H:%M %p"),
+                    "year": date.year,
+                },
+                template_name="check_in.html",
+                settings=settings,
+            )
 
         return {"detail": "Student check in successful"}
 
     raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST, detail="Student Not Found"
+        status_code=status.HTTP_404_NOT_FOUND, detail="Student Not Found"
     )
 
 
@@ -121,7 +148,12 @@ async def check_in(student_code: str):
     summary="Check Out Student",
     description="You can check in a student once daily. You cannot check in a student after you have checked the student in.",
 )
-async def check_out(student_code: str):
+async def check_out(
+    student_code: str,
+    background_tasks: BackgroundTasks,
+    request: Request,
+    settings: Settings = Depends(get_settings),
+):
     student = await student_crud.get_student_by_student_code(student_code)
     date = datetime.datetime.now()
 
@@ -141,8 +173,25 @@ async def check_out(student_code: str):
         )
         if has_not_checked_out:
             await student_crud.check_out(student.id, date.strftime("%Y-%m-%d"))
+            guardians = await student_crud.get_student_guardians_emails(
+                student_code
+            )
 
-            # send notification to student guardians.
+            if guardians:
+                send_multiple_emails(
+                    background_tasks,
+                    subject="Check Out Notification",
+                    recipients=guardians,
+                    body={
+                        "url_for": request.url_for,
+                        "ward": student.fullname(),
+                        "checkin_at": date.strftime("%A, %d %B, %Y %H:%M %p"),
+                        "year": date.year,
+                    },
+                    template_name="check_out.html",
+                    settings=settings,
+                )
+
             return {"detail": "Student check out successful"}
 
         raise HTTPException(
@@ -151,7 +200,7 @@ async def check_out(student_code: str):
         )
 
     raise HTTPException(
-        status_code=status.HTTP_400_BAD_REQUEST, detail="Student Not Found"
+        status_code=status.HTTP_404_NOT_FOUND, detail="Student Not Found"
     )
 
 
@@ -165,7 +214,7 @@ async def qr_code(student_code: str):
 
     if not student:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Student Not Found"
+            status_code=status.HTTP_404_NOT_FOUND, detail="Student Not Found"
         )
 
     img = qrcode.make(student_code)
@@ -186,3 +235,17 @@ async def attendance(student_code: str):
     )
 
     return {"attendance": student_attendance}
+
+
+@router.get(
+    "/{student_code}/guardians",
+    status_code=status.HTTP_200_OK,
+    summary="Get Student Guardians",
+)
+async def guardians(student_code: str):
+    student = await student_crud.get_student_relation_by_student_code(
+        student_code, "guardians"
+    )
+    guardians = await student.guardians
+
+    return {"guardians": guardians}

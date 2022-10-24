@@ -1,7 +1,7 @@
 import logging
 from datetime import timedelta
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, HTTPException, status
 from jose import JWTError, jwt
 
 from app.api.crud import user_crud
@@ -10,11 +10,7 @@ from app.schemas.auth import (
     RegisterPayloadSchema,
     LoginPayloadSchema,
 )
-from app.config.app import (
-    app_secret,
-    app_hash_algorithm,
-    # app_access_token_expire_minutes,
-)
+from app.config.app import settings
 from app.models.user import User
 from app.utils import create_access_token, verify_password, oauth2_scheme
 
@@ -22,7 +18,12 @@ router = APIRouter()
 log = logging.getLogger("uvicorn")
 
 
-@router.post("/register", response_model=AuthResponseSchema, status_code=201, summary="Register New User")
+@router.post(
+    "/register",
+    response_model=AuthResponseSchema,
+    status_code=201,
+    summary="Register New User",
+)
 async def register(payload: RegisterPayloadSchema) -> AuthResponseSchema:
     user = await user_crud.post(payload)
 
@@ -40,7 +41,9 @@ async def register(payload: RegisterPayloadSchema) -> AuthResponseSchema:
     }
 
 
-@router.post("/login", response_model=AuthResponseSchema, status_code=200, summary="Login User")
+@router.post(
+    "/login", response_model=AuthResponseSchema, status_code=200, summary="Login User"
+)
 async def login(form_data: LoginPayloadSchema) -> AuthResponseSchema:
     user = await authenticate_user(form_data.username, form_data.password)
 
@@ -84,7 +87,9 @@ async def get_current_user(token: str) -> User:  # pragma: no cover
         headers={"WWW-Authenticate": "Bearer"},
     )
     try:
-        payload = jwt.decode(token, app_secret, algorithms=[app_hash_algorithm])
+        payload = jwt.decode(
+            token, settings.app_secret, algorithms=[settings.app_hash_algorithm]
+        )
         username: str = payload.get("sub")
         if username is None:
             raise credentials_exception
