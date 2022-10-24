@@ -1,5 +1,6 @@
-import pytest
+import os, pytest
 
+from fastapi_mail import ConnectionConfig
 from starlette.testclient import TestClient
 from tortoise import Tortoise
 from tortoise.contrib.fastapi import register_tortoise
@@ -16,7 +17,19 @@ fake = Faker()
 
 
 def get_settings_override():
-    return Settings(testing=1, database_url=database.db_test_url, environment="testing")
+    email_configuration = ConnectionConfig(
+        SUPPRESS_SEND=1,
+        MAIL_TLS=True,
+        MAIL_SSL=False,
+        TEMPLATE_FOLDER=os.getenv("MAIL_TEMPLATE_FOLDELR"),
+    )
+
+    return Settings(
+        testing=1,
+        database_url=database.db_test_url,
+        environment="testing",
+        email_configuration=email_configuration,
+    )
 
 
 def get_current_active_user_override():
@@ -44,7 +57,7 @@ async def create_student(request) -> Student:
     """create a student in the db"""
     first_name = fake.first_name()
     last_name = fake.last_name()
-    other_names = request if request else None
+    other_names = fake.first_name() if fake.boolean() else None
     student_code = "LS-{}".format(fake.random_number(10))
 
     student = Student(
@@ -63,12 +76,10 @@ async def create_guardian(request) -> Guardian:
     """create a guardian in the db"""
     first_name = fake.first_name()
     last_name = fake.last_name()
-    other_names = request if request else None
     phone = fake.unique.phone_number()
+    email = fake.unique.email()
 
-    guardian = Guardian(
-        first_name=first_name, last_name=last_name, phone=phone
-    )
+    guardian = Guardian(first_name=first_name, last_name=last_name, phone=phone, email=email)
     await guardian.save()
 
     return guardian
