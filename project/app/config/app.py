@@ -1,10 +1,9 @@
 import logging
 import os
-from typing import Any, Dict
 
 from dotenv import load_dotenv
 from functools import lru_cache
-from pydantic import BaseSettings, validator
+from pydantic import BaseSettings, DirectoryPath
 from fastapi_mail import ConnectionConfig
 
 from app.config import database
@@ -23,6 +22,8 @@ class Settings(BaseSettings):
     environment: str = os.getenv("APP_ENVIRONMENT", "development")
     testing: bool = os.getenv("TESTING", 0)
     database_url = database.db_url
+
+    static_directory: DirectoryPath = os.getenv("STATIC_DIRECTORY")
 
     email_configuration = ConnectionConfig(
         MAIL_USERNAME=os.getenv("MAIL_USERNAME"),
