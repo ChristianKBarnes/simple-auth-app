@@ -1,6 +1,7 @@
 import logging
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from starlette.exceptions import HTTPException
 
 from app.db import init_db
@@ -15,6 +16,7 @@ def create_application() -> FastAPI:
     application = FastAPI(title=settings.app_name)
     application.include_router(api_router)
     application.add_exception_handler(HTTPException, http_error_handler)
+    application.mount("/static", StaticFiles(directory="app/static"), name="static")
 
     return application
 
