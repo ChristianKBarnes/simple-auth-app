@@ -1,12 +1,12 @@
 from datetime import datetime, timedelta
 
-from fastapi import BackgroundTasks
+from fastapi import BackgroundTasks, Depends
 from fastapi.security import OAuth2PasswordBearer
 from fastapi_mail import FastMail, MessageSchema
 from passlib.context import CryptContext
 from jose import jwt
 
-from app.config.app import settings
+from app.config.app import Settings, get_settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -22,6 +22,7 @@ def get_password_hash(password):
 
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
+    settings = get_settings()
     to_encode = data.copy()
     if expires_delta:
         expire = datetime.utcnow() + expires_delta
@@ -37,17 +38,38 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 def send_email(
     background_tasks: BackgroundTasks,
     subject: str,
-    email_to: str,
+    email_to: list,
     body: dict,
     template_name: str,
-):
+    settings: Settings = Depends(get_settings),
+) -> None:
 
     message = MessageSchema(
         subject=subject,
-        recipients=[email_to],
+        recipients=email_to,
         template_body=body,
-        subtype='html',
+        subtype="html",
     )
 
     fm = FastMail(settings.email_configuration)
-    background_tasks.add_task(fm.send_message, message, template_name="test_email.html")
+    background_tasks.add_task(fm.send_message, message, template_name=template_name)
+
+
+def send_multiple_emails(
+    background_tasks: BackgroundTasks,
+    subject: str,
+    recipients: list,
+    body: dict,
+    template_name: str,
+    settings: Settings = Depends(get_settings),
+) -> None:
+    for recipient in recipients:
+        body["guardian_name"] = recipient["name"]
+        send_email(
+            background_tasks,
+            subject=subject,
+            email_to=[recipient["email"]],
+            body=body,
+            template_name=template_name,
+            settings=settings,
+        )
