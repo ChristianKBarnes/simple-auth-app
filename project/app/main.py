@@ -16,7 +16,7 @@ def create_application() -> FastAPI:
     application = FastAPI(title=settings.app_name)
     application.include_router(api_router)
     application.add_exception_handler(HTTPException, http_error_handler)
-    application.mount("/static", StaticFiles(directory="app/static"), name="static")
+    application.mount("/static", StaticFiles(directory=settings.static_directory), name="static")
 
     return application
 
