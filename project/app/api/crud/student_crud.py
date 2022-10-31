@@ -83,6 +83,14 @@ async def delete(id: int) -> int | None:
     return None
 
 
+async def restore(id: int) -> int | None:
+    student = await Student.filter(Q(id=id)).update(deleted_at=None)
+
+    if student:
+        return student
+    return None
+
+
 async def put(id: int, payload: StudentUpdate) -> Dict | None:
     data = payload.dict(exclude_unset=True)
 
@@ -144,7 +152,7 @@ async def check_in(student: int, date):
 async def check_out(student: int, date):
     attendance = await StudentAttendance.filter(
         Q(student=student) & Q(date=date)
-    ).update(checkout_at=datetime.datetime.now(), updated_at = datetime.datetime.now())
+    ).update(checkout_at=datetime.datetime.now(), updated_at=datetime.datetime.now())
 
     return attendance
 
