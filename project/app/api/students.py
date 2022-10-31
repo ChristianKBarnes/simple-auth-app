@@ -68,7 +68,7 @@ async def store(payload: StudentCreate) -> GetStudentResponse:
     return {"student": student}
 
 
-@router.put("/{id}", status_code=200, summary="Update Student Details")
+@router.put("/{id}", status_code=status.HTTP_200_OK, summary="Update Student Details")
 async def update(id: int, payload: StudentUpdate) -> Dict:
     student = await student_crud.put(id, payload)
 
@@ -80,7 +80,7 @@ async def update(id: int, payload: StudentUpdate) -> Dict:
     return {"detail": "Student updated successfully"}
 
 
-@router.delete("/{id}", status_code=204, summary="Delete Student")
+@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT, summary="Delete Student")
 async def delete(id: int):
     student = await student_crud.delete(id)
 
@@ -90,6 +90,18 @@ async def delete(id: int):
         )
 
     return {"detail": "Student deleted successfully"}
+
+
+@router.put("/restore/{id}", status_code=status.HTTP_200_OK, summary="Restore Student")
+async def restore(id: int):
+    student = await student_crud.restore(id)
+
+    if not student:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Student Not Found"
+        )
+
+    return {"detail": "Student restored successfully"}
 
 
 @router.post(
@@ -173,9 +185,7 @@ async def check_out(
         )
         if has_not_checked_out:
             await student_crud.check_out(student.id, date.strftime("%Y-%m-%d"))
-            guardians = await student_crud.get_student_guardians_emails(
-                student_code
-            )
+            guardians = await student_crud.get_student_guardians_emails(student_code)
 
             if guardians:
                 send_multiple_emails(
