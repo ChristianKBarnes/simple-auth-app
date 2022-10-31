@@ -19,4 +19,4 @@ class StudentAttendance(Model, Timestamp):
         table = "student_attendace"
 
     class PydanticMeta:
-        exclude = ["created_at", "deleted_at"]
+        exclude = ["deleted_at"]

@@ -9,6 +9,7 @@ class AttendanceShemaBase(BaseModel):
     checkin_at: date | None
     checkout_at: date | None
     date: date
+    created_at: datetime
     updated_at: datetime
     student: BaseResponse
 
