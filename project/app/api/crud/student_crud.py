@@ -144,7 +144,7 @@ async def check_in(student: int, date):
 async def check_out(student: int, date):
     attendance = await StudentAttendance.filter(
         Q(student=student) & Q(date=date)
-    ).update(checkout_at=datetime.datetime.now())
+    ).update(checkout_at=datetime.datetime.now(), updated_at = datetime.datetime.now())
 
     return attendance
 
