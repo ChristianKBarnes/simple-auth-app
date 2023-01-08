@@ -12,6 +12,7 @@ from app.config import database
 from app.api.auth import get_current_active_user
 from app.models.student import Student
 from app.models.guardian import Guardian
+from app.models.teacher import Teacher
 
 fake = Faker()
 
@@ -83,6 +84,20 @@ async def create_guardian(request) -> Guardian:
     await guardian.save()
 
     return guardian
+
+@pytest.fixture
+async def create_teacher(request) -> Teacher:
+    """create a teacher in the db"""
+    first_name = fake.first_name()
+    last_name = fake.last_name()
+    phone = fake.unique.phone_number()
+    email = fake.unique.email()
+    teacher_code = "LS-{}-T".format(fake.random_number(10))
+
+    teacher = Teacher(first_name=first_name, last_name=last_name, phone=phone, email=email, teacher_code=teacher_code)
+    await teacher.save()
+
+    return teacher
 
 
 @pytest.fixture(scope="module")
