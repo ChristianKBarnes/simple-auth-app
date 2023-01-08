@@ -85,18 +85,15 @@ async def restore(id: int) -> int | None:
         return teacher
     return None
 
-
-async def put(id: int, payload: TeacherUpdate) -> Dict | None:
-    data = payload.dict(exclude_unset=True)
-
-    teacher = await Teacher.filter(Q(id=id) & Q(deleted_at=None)).update(**data)
+async def put(id: int, payload: TeacherUpdate) -> dict | None:
+    teacher = await Teacher.filter(Q(id=id) & Q(deleted_at=None)).update(
+        **payload.dict(exclude_unset=True)
+    )
 
     if teacher:
         updated_teacher = await Teacher.filter(id=id).first()
-
         return updated_teacher
     return None
-
 
 async def generate_teacher_code() -> str:
     teacher_count = await Teacher.all().count() + 1
