@@ -44,7 +44,7 @@ def get_settings() -> BaseSettings:
 
 
 app_secret: str = os.getenv("APP_SECRET_KEY", None)
-app_hash_algorithm: str = os.getenv("APP_HASH_ALGORITHM", None)
+app_hash_algorithm: str = os.getenv("APP_HASH_ALGORITHM", 'HS256')
 app_access_token_expire_minutes: float = os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30)
 
 

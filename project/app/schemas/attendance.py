@@ -16,3 +16,16 @@ class AttendanceShemaBase(BaseModel):
 
 class AttendaceResponse(BaseModel):
     attendance: List[AttendanceShemaBase]
+
+
+class TeacherAttendanceShemaBase(BaseModel):
+    checkin_at: date | None
+    checkout_at: date | None
+    date: date
+    created_at: datetime
+    updated_at: datetime
+    student: BaseResponse
+
+
+class TeacherAttendaceResponse(BaseModel):
+    attendance: List[AttendanceShemaBase]
