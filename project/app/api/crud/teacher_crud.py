@@ -136,14 +136,3 @@ async def check_out(teacher: int, date):
     ).update(checkout_at=datetime.datetime.now(), updated_at=datetime.datetime.now())
 
     return attendance
-
-
-async def get_teacher_guardians_emails(teacher: str):
-    teacher = await get_teacher_relation_by_teacher_code(teacher, "guardians")
-    guardians = await teacher.guardians
-
-    return [
-        {"email": guardian.email, "name": guardian.first_name}
-        for guardian in guardians
-        if guardian.email is not None
-    ]

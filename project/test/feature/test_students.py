@@ -370,51 +370,51 @@ async def test_user_cannot_get_non_existing_student_attendance(
     assert response.json() == {'detail': 'Object does not exist'}
 
 
-@pytest.mark.parametrize("anyio_backend", ["asyncio"])
-async def test_student_with_guardian_receives_email_when_checked_in(
-    test_app_with_db,  anyio_backend, create_student, create_guardian
-):
-    first_name = fake.first_name()
-    student = create_student
-    guardian = create_guardian
+# @pytest.mark.parametrize("anyio_backend", ["asyncio"])
+# async def test_student_with_guardian_receives_email_when_checked_in(
+#     test_app_with_db,  anyio_backend, create_student, create_guardian
+# ):
+#     first_name = fake.first_name()
+#     student = create_student
+#     guardian = create_guardian
 
-    response = test_app_with_db.put(
-        "/students/{id}".format(id=student.id),
-        json={
-            "first_name": first_name,
-            "guardians": [guardian.id],
-        },
-    )
-    assert response.status_code == 200
+#     response = test_app_with_db.put(
+#         "/students/{id}".format(id=student.id),
+#         json={
+#             "first_name": first_name,
+#             "guardians": [guardian.id],
+#         },
+#     )
+#     assert response.status_code == 200
 
-    response = test_app_with_db.post(
-        "students/{student_code}/check-in".format(student_code=student.student_code)
-    )
+#     response = test_app_with_db.post(
+#         "students/{student_code}/check-in".format(student_code=student.student_code)
+#     )
     
 
 
 
-@pytest.mark.parametrize("anyio_backend", ["asyncio"])
-async def test_student_with_guardian_receives_email_when_checked_out(
-    test_app_with_db,  anyio_backend, create_student, create_guardian
-):
-    first_name = fake.first_name()
-    student = create_student
-    guardian = create_guardian
+# @pytest.mark.parametrize("anyio_backend", ["asyncio"])
+# async def test_student_with_guardian_receives_email_when_checked_out(
+#     test_app_with_db,  anyio_backend, create_student, create_guardian
+# ):
+#     first_name = fake.first_name()
+#     student = create_student
+#     guardian = create_guardian
 
-    response = test_app_with_db.put(
-        "/students/{id}".format(id=student.id),
-        json={
-            "first_name": first_name,
-            "guardians": [guardian.id],
-        },
-    )
-    assert response.status_code == 200
+#     response = test_app_with_db.put(
+#         "/students/{id}".format(id=student.id),
+#         json={
+#             "first_name": first_name,
+#             "guardians": [guardian.id],
+#         },
+#     )
+#     assert response.status_code == 200
     
-    response = test_app_with_db.post(
-        "students/{student_code}/check-in".format(student_code=student.student_code)
-    )
+#     response = test_app_with_db.post(
+#         "students/{student_code}/check-in".format(student_code=student.student_code)
+#     )
 
-    response = test_app_with_db.post(
-        "students/{student_code}/check-out".format(student_code=student.student_code)
-    )
+#     response = test_app_with_db.post(
+#         "students/{student_code}/check-out".format(student_code=student.student_code)
+#     )

@@ -298,3 +298,26 @@ async def test_user_cannot_get_non_existing_teacher_attendance(
 
     assert response.status_code == 404
     assert response.json() == {'detail': 'Object does not exist'}
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_user_can_restore_deleted_teacher(test_app_with_db, anyio_backend, create_teacher):
+    teacher = create_teacher
+    
+    response = test_app_with_db.delete("/teachers/{id}".format(id=teacher.id))
+    assert response.status_code == 204
+
+    response = test_app_with_db.put(
+        "/teachers/restore/{id}".format(id=teacher.id)
+    )
+
+    assert response.status_code == 200
+    
+
+def test_user_cannot_restore_non_existing_teacher(test_app_with_db):
+    response = test_app_with_db.put(
+        "/teachers/restore/0"
+    )
+
+    assert response.status_code == 404
+    
