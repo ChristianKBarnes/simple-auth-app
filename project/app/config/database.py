@@ -12,5 +12,7 @@ MODELS = [
     "app.models.student",
     "app.models.guardian",
     "app.models.student_attendance",
+    "app.models.teacher",
+    "app.models.teacher_attendance",
     "aerich.models",
 ]
