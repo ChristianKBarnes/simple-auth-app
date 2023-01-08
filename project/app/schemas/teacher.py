@@ -16,7 +16,7 @@ class TeacherCreate(TeacherBase):
 class TeacherUpdate(TeacherBase):
     first_name: str | None
     last_name: str | None
-    guardians: List[int] | None
+    phone: str | None
 
 
 class BaseResponse(TeacherBase):
