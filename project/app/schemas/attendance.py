@@ -2,7 +2,8 @@ from typing import Any, List, TypedDict
 from datetime import date, datetime
 from pydantic import BaseModel
 
-from app.schemas.student import BaseResponse
+from app.schemas.student import BaseResponse as StudentBaseResponse
+from app.schemas.teacher import BaseResponse as TeacherBaseResponse
 
 
 class AttendanceShemaBase(BaseModel):
@@ -11,7 +12,7 @@ class AttendanceShemaBase(BaseModel):
     date: date
     created_at: datetime
     updated_at: datetime
-    student: BaseResponse
+    student: StudentBaseResponse
 
 
 class AttendaceResponse(BaseModel):
@@ -24,8 +25,8 @@ class TeacherAttendanceShemaBase(BaseModel):
     date: date
     created_at: datetime
     updated_at: datetime
-    student: BaseResponse
+    teacher: TeacherBaseResponse
 
 
 class TeacherAttendaceResponse(BaseModel):
-    attendance: List[AttendanceShemaBase]
+    attendance: List[TeacherAttendanceShemaBase]
