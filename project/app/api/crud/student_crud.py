@@ -106,6 +106,8 @@ async def put(id: int, payload: StudentUpdate) -> Dict | None:
         if guardians:
             for guardian in guardians:
                 await st.guardians.add(guardian)
+            
+            student = 1
 
     if student:
         updated_student = await Student.filter(id=id).first()
