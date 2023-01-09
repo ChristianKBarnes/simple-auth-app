@@ -1,17 +1,18 @@
-import datetime, io
+import datetime
 from typing import Dict
 
-import qrcode
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, UploadFile, Depends, Request, BackgroundTasks
 from starlette.responses import StreamingResponse
 
 from app.api.crud import teacher_crud
+from app.config.app import Settings, get_settings
 from app.schemas.teacher import (
     TeacherCreate,
     AllTeachersResponse,
     GetTeacherResponse,
     TeacherUpdate,
 )
+from app.utils import send_email, generate_qrcode
 
 router = APIRouter()
 
@@ -183,10 +184,7 @@ async def qr_code(teacher_code: str):
             status_code=status.HTTP_404_NOT_FOUND, detail="Teacher Not Found"
         )
 
-    img = qrcode.make(teacher_code)
-    response_buffer = io.BytesIO()
-    img.save(response_buffer)
-    response_buffer.seek(0)
+    response_buffer = generate_qrcode(teacher_code)
     return StreamingResponse(response_buffer, media_type="image/jpeg")
 
 
@@ -202,3 +200,33 @@ async def attendance(teacher_code: str):
 
     return {"attendance": teacher_attendance}
 
+
+@router.post(
+    "/{teacher_code}/welcome",
+    status_code=status.HTTP_200_OK,
+    summary="Welcome student",
+)
+async def welcome(
+    background_tasks: BackgroundTasks,
+    teacher_code: str,
+    request: Request,
+    settings: Settings = Depends(get_settings),
+):
+    teacher = await teacher_crud.get_teacher_by_teacher_code(teacher_code)
+
+    attachment = UploadFile(filename="QR Code", file=generate_qrcode(teacher_code), content_type="image/jpeg")
+
+    send_email(
+        background_tasks,
+        subject="Welcome to Little Steps Montessori",
+        email_to=[teacher.email],
+        body={
+            "url_for": request.url_for,
+            "ward": teacher.fullname(),
+        },
+        template_name="welcome.html",
+        settings=settings,
+        attachments=[attachment],
+    )
+
+    return {"detail": "Teacher welcomed successfully."}
