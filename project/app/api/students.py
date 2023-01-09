@@ -1,8 +1,7 @@
-import datetime, io
+import datetime
 from typing import Dict
 
-import qrcode
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, status, UploadFile
 from starlette.responses import StreamingResponse
 
 from app.api.crud import student_crud
@@ -12,8 +11,9 @@ from app.schemas.student import (
     GetStudentResponse,
     StudentUpdate,
 )
-from app.utils import send_email, send_multiple_emails
+from app.utils import send_email, send_multiple_emails, generate_qrcode
 from app.config.app import Settings, get_settings
+from app.logging import log
 
 router = APIRouter()
 
@@ -227,11 +227,8 @@ async def qr_code(student_code: str):
             status_code=status.HTTP_404_NOT_FOUND, detail="Student Not Found"
         )
 
-    img = qrcode.make(student_code)
-    response_buffer = io.BytesIO()
-    img.save(response_buffer)
-    response_buffer.seek(0)
-    return StreamingResponse(response_buffer, media_type="image/jpeg")
+    qrcode_buffer = generate_qrcode(student_code)
+    return StreamingResponse(qrcode_buffer, media_type="image/jpeg")
 
 
 @router.get(
@@ -259,3 +256,36 @@ async def guardians(student_code: str):
     guardians = await student.guardians
 
     return {"guardians": guardians}
+
+
+@router.post(
+    "/{student_code}/welcome",
+    status_code=status.HTTP_200_OK,
+    summary="Welcome student",
+)
+async def welcome(
+    background_tasks: BackgroundTasks,
+    student_code: str,
+    request: Request,
+    settings: Settings = Depends(get_settings),
+):
+    student = await student_crud.get_student_by_student_code(student_code)
+    guardians = await student_crud.get_student_guardians_emails(student_code)
+
+    if guardians:
+        attachment = UploadFile(filename="QR Code", file=generate_qrcode(student_code), content_type="image/jpeg")
+
+        send_email(
+            background_tasks,
+            subject="Welcome to Little Steps Montessori",
+            email_to=list(map(lambda guardian: guardian["email"], guardians)),
+            body={
+                "url_for": request.url_for,
+                "ward": student.fullname(),
+            },
+            template_name="welcome.html",
+            settings=settings,
+            attachments=[attachment],
+        )
+
+    return {"detail": "Student welcomed successfully."}

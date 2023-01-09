@@ -8,3 +8,4 @@ env
 .pytest_cache
 project/test.db
 project/.coverage
+project/.DS_Store

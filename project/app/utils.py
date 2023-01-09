@@ -1,3 +1,4 @@
+import io
 from datetime import datetime, timedelta
 
 from fastapi import BackgroundTasks, Depends
@@ -5,6 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi_mail import FastMail, MessageSchema
 from passlib.context import CryptContext
 from jose import jwt
+import qrcode
 
 from app.config.app import Settings, get_settings
 
@@ -42,6 +44,7 @@ def send_email(
     body: dict,
     template_name: str,
     settings: Settings = Depends(get_settings),
+    attachments: list = [] 
 ) -> None:
 
     message = MessageSchema(
@@ -49,6 +52,7 @@ def send_email(
         recipients=email_to,
         template_body=body,
         subtype="html",
+        attachments=attachments,
     )
 
     fm = FastMail(settings.email_configuration)
@@ -73,3 +77,12 @@ def send_multiple_emails(
             template_name=template_name,
             settings=settings,
         )
+
+
+def generate_qrcode(data):
+    code_image = qrcode.make(data)
+    response_buffer = io.BytesIO()
+    code_image.save(response_buffer)
+    response_buffer.seek(0)
+
+    return response_buffer
