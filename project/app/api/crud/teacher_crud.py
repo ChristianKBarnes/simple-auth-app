@@ -42,16 +42,6 @@ async def get_teacher_by_teacher_code(teacher_code: str) -> dict | None:
     return None
 
 
-async def get_teacher_relation_by_teacher_code(
-    teacher_code: str, relation: str
-) -> Dict | None:
-    teacher = await Teacher.get(
-        teacher_code=teacher_code, deleted_at=None
-    ).prefetch_related(relation)
-
-    return teacher
-
-
 async def get_teacher_attendace_by_teacher_code(teacher_code: str) -> Dict | None:
     teacher = await Teacher.get(
         teacher_code=teacher_code, deleted_at=None
