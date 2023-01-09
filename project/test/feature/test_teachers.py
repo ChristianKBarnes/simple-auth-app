@@ -320,4 +320,12 @@ def test_user_cannot_restore_non_existing_teacher(test_app_with_db):
     )
 
     assert response.status_code == 404
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_welcome_teacher_with_guardians_returns_200(test_app_with_db, create_teacher, anyio_backend):
+    teacher = create_teacher
+
+    response = test_app_with_db.post("teachers/{teacher_code}/welcome".format(teacher_code=teacher.teacher_code))
     
+    assert response.status_code == 200
