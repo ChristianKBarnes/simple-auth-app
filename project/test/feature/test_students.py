@@ -86,14 +86,12 @@ async def test_post_request_with_guardians_creates_student_guardian_relation(
 async def test_put_request_with_guardians_creates_student_guardian_relation(
     test_app_with_db, anyio_backend, create_guardian, create_student
 ):
-    first_name = fake.first_name()
     student = create_student
     guardian = create_guardian
 
     response = test_app_with_db.put(
         "/students/{id}".format(id=student.id),
         json={
-            "first_name": first_name,
             "guardians": [guardian.id],
         },
     )
@@ -418,3 +416,47 @@ async def test_student_with_guardian_receives_email_when_checked_out(
     response = test_app_with_db.post(
         "students/{student_code}/check-out".format(student_code=student.student_code)
     )
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_user_can_restore_deleted_student(test_app_with_db, anyio_backend, create_student):
+    student = create_student
+    
+    response = test_app_with_db.delete("/students/{id}".format(id=student.id))
+    assert response.status_code == 204
+
+    response = test_app_with_db.put(
+        "/students/restore/{id}".format(id=student.id)
+    )
+
+    assert response.status_code == 200
+    
+
+def test_user_cannot_restore_non_existing_student(test_app_with_db):
+    response = test_app_with_db.put(
+        "/students/restore/0"
+    )
+
+    assert response.status_code == 404
+    
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_welcome_student_with_guardians_returns_200(test_app_with_db, create_student, create_guardian, anyio_backend):
+    student = create_student
+    test_app_with_db.put(
+        "/students/{id}".format(id=student.id),
+        json={
+            "guardians": [create_guardian.id],
+        },
+    )
+
+    response = test_app_with_db.post("students/{student_code}/welcome".format(student_code=student.student_code))
+    
+    assert response.status_code == 200
+
+
+@pytest.mark.parametrize("anyio_backend", ["asyncio"])
+async def test_welcome_student_without_guardians_returns_200(test_app_with_db, create_student, anyio_backend):
+    response = test_app_with_db.post("students/{student_code}/welcome".format(student_code=create_student.student_code))
+    
+    assert response.status_code == 200
