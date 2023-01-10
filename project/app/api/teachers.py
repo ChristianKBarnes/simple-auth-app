@@ -204,7 +204,7 @@ async def attendance(teacher_code: str):
 @router.post(
     "/{teacher_code}/welcome",
     status_code=status.HTTP_200_OK,
-    summary="Welcome student",
+    summary="Welcome teacher",
 )
 async def welcome(
     background_tasks: BackgroundTasks,
@@ -214,7 +214,7 @@ async def welcome(
 ):
     teacher = await teacher_crud.get_teacher_by_teacher_code(teacher_code)
 
-    attachment = UploadFile(filename="QR Code", file=generate_qrcode(teacher_code), content_type="image/jpeg")
+    attachment = UploadFile(filename="QR Code.jpg", file=generate_qrcode(teacher_code), content_type="image/jpeg")
 
     send_email(
         background_tasks,
