@@ -273,7 +273,7 @@ async def welcome(
     guardians = await student_crud.get_student_guardians_emails(student_code)
 
     if guardians:
-        attachment = UploadFile(filename="QR Code", file=generate_qrcode(student_code), content_type="image/jpeg")
+        attachment = UploadFile(filename="QR Code.jpg", file=generate_qrcode(student_code), content_type="image/jpeg")
 
         send_email(
             background_tasks,
