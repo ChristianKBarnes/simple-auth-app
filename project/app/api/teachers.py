@@ -125,7 +125,7 @@ async def check_in(teacher_code: str):
             )
         await teacher_crud.check_in(teacher.id, date.strftime("%Y-%m-%d"))
 
-        return {"detail": "Teacher check in successful"}
+        return {"detail": teacher.fullname() + " check in successful"}
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND, detail="Teacher Not Found"
@@ -159,7 +159,7 @@ async def check_out(teacher_code: str):
         if has_not_checked_out:
             await teacher_crud.check_out(teacher.id, date.strftime("%Y-%m-%d"))
 
-            return {"detail": "Teacher check out successful"}
+            return {"detail": teacher.fullname() + " check out successful"}
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
