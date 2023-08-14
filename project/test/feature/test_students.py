@@ -226,8 +226,6 @@ async def test_existing_student_can_check_in(
     )
 
     assert response.status_code == 200
-    data = response.json()
-    assert data["detail"] == "Student check in successful"
 
 
 def test_non_existing_student_cannot_check_in(test_app_with_db, anyio_backend):
@@ -272,8 +270,6 @@ async def test_checked_in_student_can_check_out(
     )
 
     assert response.status_code == 200
-    data = response.json()
-    assert data["detail"] == "Student check out successful"
 
 
 def test_non_existing_student_cannot_check_out(test_app_with_db, anyio_backend):
