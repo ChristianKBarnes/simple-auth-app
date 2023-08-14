@@ -147,7 +147,7 @@ async def check_in(
                 settings=settings,
             )
 
-        return {"detail": "Student check in successful"}
+        return {"detail": student.fullname() + " check in successful"}
 
     raise HTTPException(
         status_code=status.HTTP_404_NOT_FOUND, detail="Student Not Found"
@@ -202,7 +202,7 @@ async def check_out(
                     settings=settings,
                 )
 
-            return {"detail": "Student check out successful"}
+            return {"detail":  student.fullname() + " check out successful"}
 
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
